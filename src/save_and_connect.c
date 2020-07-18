@@ -21,7 +21,7 @@
 static int
 check_wpa_supplicant(void)
 {
-        int state       = system("which wpa_supplicanta > /dev/null 2>&1");
+        int state       = system("which wpa_supplicant > /dev/null 2>&1");
         return state;
 }
 
@@ -60,11 +60,7 @@ save_and_connect(GtkWidget *parent)
                 return show_message(GTK_WINDOW(parent), mtype, btype, title, message);
         }
 
-        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hidden_check))) {
-                scan_ssid       = '1';
-        } else {
-                scan_ssid       = '0';
-        }
+        scan_ssid = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hidden_check)) ? '1' : '0';
 
         size_t hashed_pass_len = 80;
         size_t command_len = 16 + strlen(ssid) + 2 + strlen(password) + 26;
