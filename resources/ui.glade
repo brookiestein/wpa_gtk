@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.2 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkImage" id="save_and_connect_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-ok</property>
+  </object>
+  <object class="GtkWindow" id="window">
+    <property name="width_request">450</property>
+    <property name="height_request">250</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">WPA GUI by Brookie</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center</property>
+    <child type="titlebar">
+      <object class="GtkMenuBar" id="bar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkMenuItem" id="file_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">_File</property>
+            <property name="use_underline">True</property>
+            <child type="submenu">
+              <object class="GtkMenu" id="file_submenu">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkImageMenuItem" id="quit_item">
+                    <property name="label">gtk-quit</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="use_underline">True</property>
+                    <property name="use_stock">True</property>
+                    <accelerator key="q" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkMenuItem" id="help_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">_Help</property>
+            <property name="use_underline">True</property>
+            <child type="submenu">
+              <object class="GtkMenu" id="help_submenu">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkImageMenuItem" id="about_item">
+                    <property name="label">gtk-about</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="use_underline">True</property>
+                    <property name="use_stock">True</property>
+                    <accelerator key="i" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkImageMenuItem" id="help_item">
+                    <property name="label">gtk-help</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="use_underline">True</property>
+                    <property name="use_stock">True</property>
+                    <accelerator key="F1" signal="activate"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkFixed" id="fixed_layout">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkLabel" id="ssid_label">
+            <property name="width_request">35</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">SSID:</property>
+          </object>
+          <packing>
+            <property name="x">130</property>
+            <property name="y">35</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="password_label">
+            <property name="width_request">61</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Password:</property>
+          </object>
+          <packing>
+            <property name="x">105</property>
+            <property name="y">72</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="save_and_connect_button">
+            <property name="label" translatable="yes">Save &amp; Connect</property>
+            <property name="width_request">121</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">save_and_connect_image</property>
+            <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+          </object>
+          <packing>
+            <property name="x">115</property>
+            <property name="y">140</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="close_button">
+            <property name="label">gtk-close</property>
+            <property name="width_request">73</property>
+            <property name="height_request">32</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+          </object>
+          <packing>
+            <property name="x">260</property>
+            <property name="y">140</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ssid_entry">
+            <property name="width_request">168</property>
+            <property name="height_request">28</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+          </object>
+          <packing>
+            <property name="x">185</property>
+            <property name="y">30</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="password_entry">
+            <property name="width_request">168</property>
+            <property name="height_request">28</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+          </object>
+          <packing>
+            <property name="x">185</property>
+            <property name="y">67</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="hidden_check">
+            <property name="label" translatable="yes">Is it hidden?</property>
+            <property name="width_request">95</property>
+            <property name="height_request">21</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="x">105</property>
+            <property name="y">107</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
