@@ -92,7 +92,7 @@
           </object>
           <packing>
             <property name="x">130</property>
-            <property name="y">35</property>
+            <property name="y">25</property>
           </packing>
         </child>
         <child>
@@ -105,7 +105,7 @@
           </object>
           <packing>
             <property name="x">105</property>
-            <property name="y">72</property>
+            <property name="y">62</property>
           </packing>
         </child>
         <child>
@@ -121,7 +121,7 @@
           </object>
           <packing>
             <property name="x">115</property>
-            <property name="y">140</property>
+            <property name="y">160</property>
           </packing>
         </child>
         <child>
@@ -136,7 +136,7 @@
           </object>
           <packing>
             <property name="x">260</property>
-            <property name="y">140</property>
+            <property name="y">160</property>
           </packing>
         </child>
         <child>
@@ -148,7 +148,7 @@
           </object>
           <packing>
             <property name="x">185</property>
-            <property name="y">30</property>
+            <property name="y">20</property>
           </packing>
         </child>
         <child>
@@ -157,10 +157,11 @@
             <property name="height_request">28</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="tooltip_text" translatable="yes">Notice that the password needs to be greater than 8 characters.</property>
           </object>
           <packing>
             <property name="x">185</property>
-            <property name="y">67</property>
+            <property name="y">57</property>
           </packing>
         </child>
         <child>
@@ -175,7 +176,33 @@
           </object>
           <packing>
             <property name="x">105</property>
-            <property name="y">107</property>
+            <property name="y">127</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="security_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Security:</property>
+          </object>
+          <packing>
+            <property name="x">113</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBoxText" id="security_combo">
+            <property name="width_request">167</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <items>
+              <item id="0" translatable="yes">WPA2-PSK</item>
+              <item id="1" translatable="yes">Open</item>
+            </items>
+          </object>
+          <packing>
+            <property name="x">185</property>
+            <property name="y">94</property>
           </packing>
         </child>
       </object>

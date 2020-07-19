@@ -42,6 +42,6 @@
 
 /* Defined on main.h */
 extern GtkEntryBuffer *ssid_buffer, *password_buffer;
-extern GtkWidget *hidden_check;
+extern GtkWidget *security_combo, *hidden_check;
 
 gint save_and_connect(GtkWidget *parent);

@@ -29,7 +29,7 @@ get_info(GtkWidget *parent)
 to new Wi-Fi connections.\n\
 This tool uses WPA Supplicant, so you need to have installed it.\n\n\
 Name: WPA GUI by Brookie\n\
-Version: 1.0.1\n\
+Version: 1.1\n\
 License: GPL v2\n\
 Author(s): Lord Brookie\n\
 Website: https://github.com/brookiestein/wpa_gui";

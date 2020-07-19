@@ -18,6 +18,19 @@
 
 #include "main.h"
 
+static gint
+set_sensitive(GtkWidget *password_entry)
+{
+        gboolean setting        = TRUE;
+        const gchar *security   = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(security_combo));
+        if (security != NULL && strncmp(security, "Open", 4) == 0) {
+                setting         = FALSE;
+        }
+
+        gtk_widget_set_sensitive(password_entry, setting);
+        return 0;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -53,6 +66,8 @@ main(int argc, char *argv[])
         ssid_entry      = GTK_WIDGET(gtk_builder_get_object(builder, "ssid_entry"));
         password_entry  = GTK_WIDGET(gtk_builder_get_object(builder, "password_entry"));
 
+        security_combo  = GTK_WIDGET(gtk_builder_get_object(builder, "security_combo"));
+
         hidden_check    = GTK_WIDGET(gtk_builder_get_object(builder, "hidden_check"));
 
         save_button     = GTK_WIDGET(gtk_builder_get_object(builder, "save_and_connect_button"));
@@ -74,6 +89,8 @@ main(int argc, char *argv[])
 
         g_signal_connect_swapped(about_item, "activate", G_CALLBACK(get_info), window);
         g_signal_connect_swapped(help_item, "activate", G_CALLBACK(get_help), window);
+
+        g_signal_connect_swapped(security_combo, "changed", G_CALLBACK(set_sensitive), password_entry);
 
         g_signal_connect_swapped(save_button, "clicked", G_CALLBACK(save_and_connect), window);
         g_signal_connect_swapped(leave_button, "clicked", G_CALLBACK(leave), window);

@@ -35,13 +35,11 @@ restart_service(void)
 gint
 save_and_connect(GtkWidget *parent)
 {
-        GtkMessageType mtype;
-        GtkButtonsType btype;
+        GtkMessageType mtype    = GTK_MESSAGE_WARNING;
+        GtkButtonsType btype    = GTK_BUTTONS_OK;
         gchar *title, *message;
 
         if (check_wpa_supplicant()) {
-                mtype           = GTK_MESSAGE_WARNING;
-                btype           = GTK_BUTTONS_OK;
                 title           = "Warning";
                 message         = "The WPA Supplicant binary has not been found in your system.";
                 return show_message(GTK_WINDOW(parent), mtype, btype, title, message);
@@ -49,40 +47,53 @@ save_and_connect(GtkWidget *parent)
 
         const gchar *ssid       = gtk_entry_buffer_get_text(ssid_buffer);
         const gchar *password   = gtk_entry_buffer_get_text(password_buffer);
+        const gchar *security   = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(security_combo));
         const gchar *wpa_file   = "/etc/wpa_supplicant/wpa_supplicant.conf";
         gchar scan_ssid;
+        gboolean is_there_an_error = FALSE;
 
-        if (strlen(password) < 8) {
-                mtype           = GTK_MESSAGE_WARNING;
-                btype           = GTK_BUTTONS_OK;
+        if (security == NULL) {
+                title           = "Unselected protocol";
+                message         = "The security protocol has not been chosen.";
+                is_there_an_error = TRUE;
+        } else if (strlen(password) < 8 && strncmp(security, "Open", 4)) {
                 title           = "Short password";
                 message         = "The given password is so short.";
+                is_there_an_error = TRUE;
+        }
+
+        if (is_there_an_error) {
                 return show_message(GTK_WINDOW(parent), mtype, btype, title, message);
         }
 
         scan_ssid = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hidden_check)) ? '1' : '0';
 
-        size_t hashed_pass_len = 80;
-        size_t command_len = 16 + strlen(ssid) + 2 + strlen(password) + 26;
+        FILE *fp;
+        gchar *hashed_pass;
 
-        gchar *hashed_pass     = (gchar *) malloc(hashed_pass_len);
-        gchar *command         = (gchar *) malloc(command_len + 1);
+        if (strncmp(security, "Open", 4)) {
+                size_t hashed_pass_len  = 80;
+                size_t command_len      = 16 + strlen(ssid) + 2 + strlen(password) + 26;
 
-        snprintf(command, command_len, "wpa_passphrase \"%s\" \"%s\" | grep psk | tail -n 1", ssid, password);
-        FILE *fp        = popen(command, "r");
+                hashed_pass      = (gchar *) malloc(hashed_pass_len);
+                gchar *command   = (gchar *) malloc(command_len + 1);
 
-        hashed_pass     = fgets(hashed_pass, hashed_pass_len, fp);
-        hashed_pass[hashed_pass_len - 2] = '\0'; /* Deleting the '\n' character. */
+                snprintf(command, command_len, "wpa_passphrase \"%s\" \"%s\" | grep psk | tail -n 1", ssid, password);
+                fp                = popen(command, "r");
 
-        free(command);
-        pclose(fp);
+                hashed_pass     = fgets(hashed_pass, hashed_pass_len, fp);
+                hashed_pass[hashed_pass_len - 2] = '\0'; /* Deleting the '\n' character. */
 
-        /* These values correspond to this format: */
-        /*                   network={\n\tssid=ssid\n\tscan_ssid=scan_ssid\n\tpsk=hashed_pass\n\tpriority=5\n} */
-        size_t content_len = 9 + 2 + 5 + strlen(ssid) + 2 + 4 + 10 + 1 + 2 + strlen(hashed_pass) + 2 + 9 + 2;
+                free(command);
+                pclose(fp);
+        }
+
+        size_t content_len = 254;
         gchar *content         = (gchar *) malloc(content_len + 1);
 
-        snprintf(content, 1 + content_len, "\nnetwork={\n\
+        if (strncmp(security, "WPA2-PSK", 7) == 0) {
+
+                snprintf(content, 1 + content_len, "\nnetwork={\n\
 \tssid=\"%s\"\n\
 \tscan_ssid=%c\n\
 %s\
@@ -90,6 +101,19 @@ save_and_connect(GtkWidget *parent)
 }", ssid, scan_ssid, hashed_pass);
 
         free(hashed_pass);
+
+        /* endif */
+        } else {
+
+                snprintf(content, 1 + content_len, "\nnetwork={\n\
+\tssid=\"%s\"\n\
+\tscan_ssid=%c\n\
+\tkey_mgmt=NONE\n\
+\tpriority=5\n\
+}", ssid, scan_ssid);
+
+        /* end else */
+        }
 
         fp              = fopen(wpa_file, "a");
         fwrite(content, sizeof(gchar), strlen(content), fp);
@@ -122,6 +146,8 @@ service was being restarted.";
 
         gtk_entry_buffer_set_text(ssid_buffer, "", -1);
         gtk_entry_buffer_set_text(password_buffer, "", -1);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(security_combo), -1);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hidden_check), FALSE);
 
         return 0;
 }

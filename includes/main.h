@@ -28,4 +28,5 @@
 
 /* These pointers are global for save_and_connect function may use them. */
 GtkEntryBuffer *ssid_buffer, *password_buffer;
+GtkWidget *security_combo;
 GtkWidget *hidden_check;
