@@ -16,25 +16,24 @@
 * Cambridge, MA 02139, USA.
 */
 
-#include "get_info.h"
+#ifndef __GTK_H__
+#include <gtk/gtk.h>
+#endif
 
-gint
-get_info(GtkWidget *parent)
-{
-        GtkMessageType mtype    = GTK_MESSAGE_INFO;
-        GtkButtonsType btype    = GTK_BUTTONS_OK;
-        gchar *title            = "About";
+#ifndef _STRING_H
+#include <string.h>
+#endif
 
-        gchar *message          = "This is a little tool to save and connect \
-to new Wi-Fi connections.\n\
-This tool uses WPA Supplicant, so you need to have installed it.\n\
-If you want to know more about this project, please don't forget\n\
-to visit its website.\n\n\
-Name: WPA GUI by Brookie\n\
-Version: 1.2\n\
-License: GPL v2\n\
-Author(s): Lord Brookie\n\
-Website: https://github.com/brookiestein/wpa_gui";
+#ifndef SHOW_MESSAGE_H
+#include "show_message.h"
+#endif
 
-        return show_message(GTK_WINDOW(parent), mtype, btype, title, message);
-}
+#ifndef CLEAR_FIELDS_H
+#define CLEAR_FIELDS_H 1
+#endif
+
+/* Defined on main.h */
+extern GtkEntryBuffer *ssid_buffer, *password_buffer;
+extern GtkWidget *hidden_check, *security_combo;
+
+gint clear_fields(GtkWidget *parent);

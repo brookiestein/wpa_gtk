@@ -22,6 +22,7 @@
 
 #include "show_message.h"
 #include "leave.h"
+#include "clear_fields.h"
 #include "get_info.h"
 #include "get_help.h"
 #include "save_and_connect.h"

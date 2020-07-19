@@ -14,6 +14,7 @@ RES 	:= resources
 SOURCES := src/main.c \
 	src/show_message.c \
 	src/leave.c \
+	src/clear_fields.c \
 	src/get_info.c \
 	src/get_help.c \
 	src/save_and_connect.c

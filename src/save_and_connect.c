@@ -18,18 +18,41 @@
 
 #include "save_and_connect.h"
 
+static gchar *title, *message;
+
 static int
 check_wpa_supplicant(void)
 {
-        int state       = system("which wpa_supplicant > /dev/null 2>&1");
+        char *command   = "which wpa_supplicant > /dev/null 2>&1";
+        int state       = system(command);
         return state;
 }
 
 static int
 restart_service(void)
 {
-        int state       = system("/etc/init.d/wpa_supplicant restart > /dev/null 2>&1");
+        char *command   = "/etc/init.d/wpa_supplicant restart > /dev/null 2>&1";
+        int state       = system(command);
         return state;
+}
+
+static gboolean
+verify_protocol_and_password_length(const gchar *security,
+const gchar *password)
+{
+        gboolean is_there_an_error = FALSE;
+
+        if (security == NULL) {
+                title             = "Unselected protocol";
+                message           = "The security protocol has not been chosen.";
+                is_there_an_error = TRUE;
+        } else if (strlen(password) < 8 && strncmp(security, "Open", 4)) {
+                title             = "Short password";
+                message           = "The given password is so short.";
+                is_there_an_error = TRUE;
+        }
+
+        return is_there_an_error;
 }
 
 gint
@@ -37,12 +60,12 @@ save_and_connect(GtkWidget *parent)
 {
         GtkMessageType mtype    = GTK_MESSAGE_WARNING;
         GtkButtonsType btype    = GTK_BUTTONS_OK;
-        gchar *title, *message;
 
         if (check_wpa_supplicant()) {
                 title           = "Warning";
                 message         = "The WPA Supplicant binary has not been found in your system.";
-                return show_message(GTK_WINDOW(parent), mtype, btype, title, message);
+                return show_message(GTK_WINDOW(parent), mtype, btype,
+                                title, message);
         }
 
         const gchar *ssid       = gtk_entry_buffer_get_text(ssid_buffer);
@@ -50,68 +73,61 @@ save_and_connect(GtkWidget *parent)
         const gchar *security   = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(security_combo));
         const gchar *wpa_file   = "/etc/wpa_supplicant/wpa_supplicant.conf";
         gchar scan_ssid;
-        gboolean is_there_an_error = FALSE;
 
-        if (security == NULL) {
-                title           = "Unselected protocol";
-                message         = "The security protocol has not been chosen.";
-                is_there_an_error = TRUE;
-        } else if (strlen(password) < 8 && strncmp(security, "Open", 4)) {
-                title           = "Short password";
-                message         = "The given password is so short.";
-                is_there_an_error = TRUE;
-        }
-
-        if (is_there_an_error) {
-                return show_message(GTK_WINDOW(parent), mtype, btype, title, message);
+        if (verify_protocol_and_password_length(security, password)) {
+                return show_message(GTK_WINDOW(parent), mtype, btype,
+                                title, message);
         }
 
         scan_ssid = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hidden_check)) ? '1' : '0';
 
         FILE *fp;
         gchar *hashed_pass;
+        size_t content_len = 254;
+        gchar *content = (gchar *) malloc(content_len + 1);
 
-        if (strncmp(security, "Open", 4)) {
+        if (strncmp(security, "WPA2-PSK", 8) == 0) {
                 size_t hashed_pass_len  = 80;
                 size_t command_len      = 16 + strlen(ssid) + 2 + strlen(password) + 26;
 
-                hashed_pass      = (gchar *) malloc(hashed_pass_len);
-                gchar *command   = (gchar *) malloc(command_len + 1);
+                hashed_pass     = (gchar *) malloc(hashed_pass_len);
+                gchar *command  = (gchar *) malloc(command_len + 1);
 
-                snprintf(command, command_len, "wpa_passphrase \"%s\" \"%s\" | grep psk | tail -n 1", ssid, password);
-                fp                = popen(command, "r");
+                snprintf(command, command_len,
+                        "wpa_passphrase \"%s\" \"%s\" | grep psk | tail -n 1",
+                        ssid, password);
 
+                fp              = popen(command, "r");
                 hashed_pass     = fgets(hashed_pass, hashed_pass_len, fp);
-                hashed_pass[hashed_pass_len - 2] = '\0'; /* Deleting the '\n' character. */
-
-                free(command);
-                pclose(fp);
-        }
-
-        size_t content_len = 254;
-        gchar *content         = (gchar *) malloc(content_len + 1);
-
-        if (strncmp(security, "WPA2-PSK", 7) == 0) {
 
                 snprintf(content, 1 + content_len, "\nnetwork={\n\
 \tssid=\"%s\"\n\
 \tscan_ssid=%c\n\
 %s\
 \tpriority=5\n\
-}", ssid, scan_ssid, hashed_pass);
+}\n", ssid, scan_ssid, hashed_pass);
 
-        free(hashed_pass);
+                free(hashed_pass);
+                free(command);
+                pclose(fp);
+        /* end if */
+        } else if (strncmp(security, "WEP", 3) == 0) {
 
-        /* endif */
+                snprintf(content, 1 + content_len, "\nnetwork={\n\
+\tssid=\"%s\"\n\
+\tscan_ssid=%c\n\
+\twep_key0=\"%s\"\n\
+\twep_tx_keyidx=0\n\
+\tpriority=5\n\
+}\n", ssid, scan_ssid, password);
+        /* end else if */
         } else {
-
                 snprintf(content, 1 + content_len, "\nnetwork={\n\
 \tssid=\"%s\"\n\
 \tscan_ssid=%c\n\
 \tkey_mgmt=NONE\n\
 \tpriority=5\n\
-}", ssid, scan_ssid);
-
+}\n", ssid, scan_ssid);
         /* end else */
         }
 
@@ -121,13 +137,15 @@ save_and_connect(GtkWidget *parent)
         fclose(fp);
         free(content);
 
-        mtype   = GTK_MESSAGE_QUESTION;
-        btype   = GTK_BUTTONS_YES_NO;
-        title   = "Congratulation";
-        message = "The network has been added successfully!\n\
+        mtype     = GTK_MESSAGE_QUESTION;
+        btype     = GTK_BUTTONS_YES_NO;
+        title     = "Congratulation";
+        message   = "The network has been added successfully!\n\
 Would you like to restart the WPA Supplicant service?";
 
-        gint response   = show_message(GTK_WINDOW(parent), mtype, btype, title, message);
+        gint response   = show_message(GTK_WINDOW(parent), mtype, btype,
+                        title, message);
+
         if (response == GTK_RESPONSE_YES) {
                 btype   = GTK_BUTTONS_OK;
                 int state       = restart_service();

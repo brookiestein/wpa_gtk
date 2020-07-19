@@ -41,7 +41,7 @@ main(int argc, char *argv[])
 
         GtkBuilder *builder;
         GtkWidget *window;
-        GtkWidget *quit_item, *help_item, *about_item;
+        GtkWidget *quit_item, *clear_item, *help_item, *about_item;
         GtkWidget *ssid_entry, *password_entry;
         GtkWidget *save_button, *leave_button;
         gchar *ui       = "resources/ui.glade";
@@ -60,6 +60,7 @@ main(int argc, char *argv[])
         window          = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
 
         quit_item       = GTK_WIDGET(gtk_builder_get_object(builder, "quit_item"));
+        clear_item      = GTK_WIDGET(gtk_builder_get_object(builder, "clear_fields_item"));
         about_item      = GTK_WIDGET(gtk_builder_get_object(builder, "about_item"));
         help_item       = GTK_WIDGET(gtk_builder_get_object(builder, "help_item"));
 
@@ -86,6 +87,8 @@ main(int argc, char *argv[])
         g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
         g_signal_connect_swapped(quit_item, "activate", G_CALLBACK(leave), window);
+
+        g_signal_connect_swapped(clear_item, "activate", G_CALLBACK(clear_fields), window);
 
         g_signal_connect_swapped(about_item, "activate", G_CALLBACK(get_info), window);
         g_signal_connect_swapped(help_item, "activate", G_CALLBACK(get_help), window);

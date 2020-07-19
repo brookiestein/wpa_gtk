@@ -27,8 +27,9 @@ get_help(GtkWidget *parent)
 
         gchar *message          = "Using this tool is very simple! You only need to input your\n\
 Wi-Fi network's SSID in the field called \"SSID\" and the same process for the password. \
-If your Wi-Fi network is hidden, you need\n\
-to inform to WPA Supplicant marking the check box below the last field.\n\n\
+Later choose the security protocol of you Wi-Fi\n\
+network. If your Wi-Fi network is hidden, you need\n\
+to inform to WPA Supplicant marking the check box below the security combo.\n\n\
 Also, you may want to restart the WPA Supplicant service.\n\
 So WPA Supplicant will read the new configuration that includes the newest Wi-Fi network.";
 
