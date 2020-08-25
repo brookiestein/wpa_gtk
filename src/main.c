@@ -31,14 +31,22 @@ set_sensitive(GtkWidget *password_entry)
         return 0;
 }
 
+static gint
+inform(GtkWindow *parent)
+{
+        GtkMessageType mtype    = GTK_MESSAGE_WARNING;
+        GtkButtonsType btype    = GTK_BUTTONS_OK;
+        char title[]            = "Warning";
+        char message[]          = "You have executed it as normal user. \
+Your experience will be limited.\n\
+If you want to enjoy all wpagtk's features, please consider to execute\n\
+it as user root.";
+        return show_message(parent, mtype, btype, title, message);
+}
+
 int
 main(int argc, char *argv[])
 {
-        if (geteuid() != 0) {
-                fprintf(stderr, "It needs to be executed as user root.\n");
-                return 1;
-        }
-
         GtkBuilder *builder;
         GtkWidget *window;
         GtkWidget *quit_item, *clear_item, *help_item, *about_item;
@@ -99,6 +107,11 @@ main(int argc, char *argv[])
         g_signal_connect_swapped(leave_button, "clicked", G_CALLBACK(leave), window);
 
         gtk_widget_show_all(window);
+
+        if (geteuid()) {
+                inform(GTK_WINDOW(window));
+        }
+
         gtk_main();
         return 0;
 }

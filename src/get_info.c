@@ -30,11 +30,11 @@ to new Wi-Fi connections.\n\
 This tool uses WPA Supplicant, so you need to have installed it.\n\
 If you want to know more about this project, please don't forget\n\
 to visit its website.\n\n\
-Name: WPA GUI by Brookie\n\
-Version: 1.2\n\
+Name: WPA GTK\n\
+Version: 1.3\n\
 License: GPL v2\n\
 Author(s): Lord Brookie\n\
-Website: https://github.com/brookiestein/wpa_gui";
+Website: https://github.com/brookiestein/wpa_gtk";
 
         return show_message(GTK_WINDOW(parent), mtype, btype, title, message);
 }

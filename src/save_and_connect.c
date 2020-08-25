@@ -84,7 +84,7 @@ save_and_connect(GtkWidget *parent)
         FILE *fp;
         gchar *hashed_pass;
         size_t content_len = 254;
-        gchar *content = (gchar *) malloc(content_len + 1);
+        gchar *content = (gchar *) malloc(content_len + 1 * sizeof(gchar *));
 
         if (strncmp(security, "WPA2-PSK", 8) == 0) {
                 size_t hashed_pass_len  = 80;
@@ -147,7 +147,7 @@ Would you like to restart the WPA Supplicant service?";
                         title, message);
 
         if (response == GTK_RESPONSE_YES) {
-                btype   = GTK_BUTTONS_OK;
+                btype           = GTK_BUTTONS_OK;
                 int state       = restart_service();
 
                 if (state == 0) {

@@ -1,7 +1,7 @@
 CC 	:= gcc
 CFLAGS 	:= -O2 -pipe -march=native -m64 -std=c99 -Wall -Wextra -Iincludes
 CFLAGS 	+= $(shell pkg-config --cflags --libs gtk+-3.0)
-TARGET 	:= wpa_gui_brookie
+TARGET 	:= wpagtk
 PREFIX 	:= /usr/local/bin
 SHARE 	:= /usr/share
 COPY 	:= cp -f -r
