@@ -31,7 +31,7 @@ This tool uses WPA Supplicant, so you need to have installed it.\n\
 If you want to know more about this project, please don't forget\n\
 to visit its website.\n\n\
 Name: WPA GTK\n\
-Version: 1.3\n\
+Version: 1.3.1\n\
 License: GPL v2\n\
 Author(s): Lord Brookie\n\
 Website: https://github.com/brookiestein/wpa_gtk";

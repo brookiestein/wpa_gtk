@@ -18,22 +18,20 @@
 
 #include "save_and_connect.h"
 
+static const unsigned char ARRAY_MAX_SIZE = 255;
 static gchar *title, *message;
 
-static int
-check_wpa_supplicant(void)
+static gint
+shell(const gchar *command)
 {
-        char *command   = "which wpa_supplicant > /dev/null 2>&1";
-        int state       = system(command);
-        return state;
-}
+        FILE *fp        = popen(command, "r");
+        if (fp == NULL) {
+                fprintf(stderr, "An error occurred while the command '%s' was being executed.\n",
+                        command);
+                return 1;
+        }
 
-static int
-restart_service(void)
-{
-        char *command   = "/etc/init.d/wpa_supplicant restart > /dev/null 2>&1";
-        int state       = system(command);
-        return state;
+        return pclose(fp);
 }
 
 static gboolean
@@ -55,52 +53,59 @@ const gchar *password)
         return is_there_an_error;
 }
 
+static gint
+clear_fields(gint value)
+{
+        gtk_entry_buffer_set_text(ssid_buffer, "", -1);
+        gtk_entry_buffer_set_text(password_buffer, "", -1);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(security_combo), -1);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hidden_check), FALSE);
+        return value;
+}
+
 gint
 save_and_connect(GtkWidget *parent)
 {
         GtkMessageType mtype    = GTK_MESSAGE_WARNING;
         GtkButtonsType btype    = GTK_BUTTONS_OK;
 
-        if (check_wpa_supplicant()) {
+        if (shell("which wpa_supplicant > /dev/null 2>&1")) { /* Error */
                 title           = "Warning";
                 message         = "The WPA Supplicant binary has not been found in your system.";
-                return show_message(GTK_WINDOW(parent), mtype, btype,
-                                title, message);
+                show_message(GTK_WINDOW(parent), mtype, btype, title, message);
+                return clear_fields(EXIT_FAILURE);
         }
 
-        const gchar *ssid       = gtk_entry_buffer_get_text(ssid_buffer);
-        const gchar *password   = gtk_entry_buffer_get_text(password_buffer);
-        const gchar *security   = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(security_combo));
-        const gchar *wpa_file   = "/etc/wpa_supplicant/wpa_supplicant.conf";
+        const gchar *ssid         = gtk_entry_buffer_get_text(ssid_buffer);
+        const gchar *password     = gtk_entry_buffer_get_text(password_buffer);
+        const gchar *security     = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(security_combo));
+        const gchar *wpa_file     = "/etc/wpa_supplicant/wpa_supplicant.conf";
         gchar scan_ssid;
 
         if (verify_protocol_and_password_length(security, password)) {
-                return show_message(GTK_WINDOW(parent), mtype, btype,
-                                title, message);
+                show_message(GTK_WINDOW(parent), mtype, btype, title, message);
+                return clear_fields(EXIT_FAILURE);
         }
 
         scan_ssid = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hidden_check)) ? '1' : '0';
 
         FILE *fp;
-        gchar *hashed_pass;
-        size_t content_len = 254;
-        gchar *content = (gchar *) malloc(content_len + 1 * sizeof(gchar *));
+        gchar *content = (gchar *) malloc(ARRAY_MAX_SIZE * sizeof(gchar));
 
         if (strncmp(security, "WPA2-PSK", 8) == 0) {
-                size_t hashed_pass_len  = 80;
                 size_t command_len      = 16 + strlen(ssid) + 2 + strlen(password) + 26;
 
-                hashed_pass     = (gchar *) malloc(hashed_pass_len);
-                gchar *command  = (gchar *) malloc(command_len + 1);
+                gchar *hashed_pass      = (gchar *) malloc(ARRAY_MAX_SIZE * sizeof(gchar));
+                gchar command[ARRAY_MAX_SIZE];
 
                 snprintf(command, command_len,
                         "wpa_passphrase \"%s\" \"%s\" | grep psk | tail -n 1",
                         ssid, password);
 
                 fp              = popen(command, "r");
-                hashed_pass     = fgets(hashed_pass, hashed_pass_len, fp);
+                hashed_pass     = fgets(hashed_pass, ARRAY_MAX_SIZE, fp);
 
-                snprintf(content, 1 + content_len, "\nnetwork={\n\
+                snprintf(content, ARRAY_MAX_SIZE, "\nnetwork={\n\
 \tssid=\"%s\"\n\
 \tscan_ssid=%c\n\
 %s\
@@ -108,12 +113,11 @@ save_and_connect(GtkWidget *parent)
 }\n", ssid, scan_ssid, hashed_pass);
 
                 free(hashed_pass);
-                free(command);
                 pclose(fp);
         /* end if */
         } else if (strncmp(security, "WEP", 3) == 0) {
 
-                snprintf(content, 1 + content_len, "\nnetwork={\n\
+                snprintf(content, ARRAY_MAX_SIZE, "\nnetwork={\n\
 \tssid=\"%s\"\n\
 \tscan_ssid=%c\n\
 \twep_key0=\"%s\"\n\
@@ -122,7 +126,7 @@ save_and_connect(GtkWidget *parent)
 }\n", ssid, scan_ssid, password);
         /* end else if */
         } else {
-                snprintf(content, 1 + content_len, "\nnetwork={\n\
+                snprintf(content, ARRAY_MAX_SIZE, "\nnetwork={\n\
 \tssid=\"%s\"\n\
 \tscan_ssid=%c\n\
 \tkey_mgmt=NONE\n\
@@ -132,6 +136,16 @@ save_and_connect(GtkWidget *parent)
         }
 
         fp              = fopen(wpa_file, "a");
+        if (fp == NULL) {
+                free(content);
+                title           = "Warning";
+                message         = "You don't have enough privileges to do that.\n\
+Make sure you have writing permission in the WPA Supplicant's configuration file.\n\
+Or consider to run this program as user root.";
+                show_message(GTK_WINDOW(parent), mtype, btype, title, message);
+                return clear_fields(EXIT_FAILURE);
+        }
+
         fwrite(content, sizeof(gchar), strlen(content), fp);
 
         fclose(fp);
@@ -143,12 +157,12 @@ save_and_connect(GtkWidget *parent)
         message   = "The network has been added successfully!\n\
 Would you like to restart the WPA Supplicant service?";
 
-        gint response   = show_message(GTK_WINDOW(parent), mtype, btype,
-                        title, message);
+        gint res  = show_message(GTK_WINDOW(parent), mtype, btype, title, message);
 
-        if (response == GTK_RESPONSE_YES) {
+        if (res == GTK_RESPONSE_YES) {
                 btype           = GTK_BUTTONS_OK;
-                int state       = restart_service();
+                char command[]  = "/etc/init.d/wpa_supplicant restart > /dev/null 2>&1";
+                int state       = shell(command);
 
                 if (state == 0) {
                         mtype   = GTK_MESSAGE_INFO;
@@ -162,10 +176,5 @@ service was being restarted.";
                 show_message(GTK_WINDOW(parent), mtype, btype, title, message);
         }
 
-        gtk_entry_buffer_set_text(ssid_buffer, "", -1);
-        gtk_entry_buffer_set_text(password_buffer, "", -1);
-        gtk_combo_box_set_active(GTK_COMBO_BOX(security_combo), -1);
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hidden_check), FALSE);
-
-        return 0;
+        return clear_fields(EXIT_SUCCESS);
 }
