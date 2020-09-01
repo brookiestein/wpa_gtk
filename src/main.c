@@ -59,7 +59,7 @@ main(int argc, char *argv[])
         FILE *res_file  = fopen(ui, "r");
         if (res_file == NULL) {
                 /* This path is just created when you run the make install order. */
-                ui      = "/usr/share/wpa_gtk/resources/ui.glade";
+                ui      = "/usr/share/wpagtk/resources/ui.glade";
         } else {
                 fclose(res_file);
         }
